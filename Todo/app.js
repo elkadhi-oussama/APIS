@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./database");
 const Todo = require("./todo");
+const userRouter = require("./userRouter"); // Import userRouter
+
 
 const app = express();
 app.use(cors());
@@ -10,13 +12,17 @@ app.use(express.json());
 // Connect to MongoDB
 connectDB();
 
+
+// Use user routes
+app.use('/api/users', userRouter); // Use userRouter for /api/users
+
 // CRUD operations
 
 // Create a Todo
 app.post("/todos", async (req, res) => {
-  const { text } = req.body;
+  const { text, userId } = req.body; // Expecting userId from the request
   try {
-    const newTodo = new Todo({ text });
+    const newTodo = new Todo({ text, user: userId }); // Associate the todo with the user
     await newTodo.save();
     res.status(201).json(newTodo);
   } catch (error) {
@@ -24,10 +30,11 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-// Read all Todos
+// Read all Todos for a specific user
 app.get("/todos", async (req, res) => {
+  const { userId } = req.query; // Get userId from query parameters
   try {
-    const todos = await Todo.find();
+    const todos = await Todo.find({ user: userId }); // Filter todos by user
     res.status(200).json(todos);
   } catch (error) {
     res.status(500).json({ message: error.message });

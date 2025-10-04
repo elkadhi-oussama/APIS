@@ -11,7 +11,7 @@ router.post('/register', async (req, res) => {
 
   try {
     // Check if the username already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ username.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ message: 'Username already in use' });
     }
